@@ -1,7 +1,6 @@
 require 'spreadsheet'
 require 'fileutils'
 Spreadsheet.client_encoding = 'UTF-8'
-#
 
 #this is the engine that generates the file
 #1.  Create a header row

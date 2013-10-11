@@ -1,4 +1,4 @@
-#
+
 require 'spreadsheet'
 require_relative 'generate_baseline'
 Spreadsheet.client_encoding = 'UTF-8'
