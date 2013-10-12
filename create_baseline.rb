@@ -5,12 +5,20 @@ Spreadsheet.client_encoding = 'UTF-8'
 
 mybaseline = Baseline.new
 
-numcols = 8 #abcdefgh
-filenameroot = "baseline"
+numcols = 4 #abcdefgh etc
+filenameroot = "baseline_test"
+baselineFile = "baseline_test.xls"
 
 
-baselineFile = mybaseline.initBaselineFile(numcols, filenameroot)
+#baselineFile = mybaseline.initBaselineFile(numcols, filenameroot) #remove this later after testing
+
+#mybaseline.replacePeriods (baselineFile)
 
 puts baselineFile
 
-mybaseline.replacePeriods (baselineFile)
+#mybaseline.rewriteBaseline(baselineFile,4)
+
+mybaseline.generateBaselineFile(baselineFile)
+
+#mybaseline.insertHeaderRow(numcols, baselineFile)
+

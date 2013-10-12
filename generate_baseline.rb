@@ -49,13 +49,93 @@ class Baseline
 
   end
 
+  def insertHeaderRow(numColumns,baselineFile)
+
+    tmpfile = "tmp_#{baselineFile}"
+    Spreadsheet.open baselineFile do |book|
+      sheet = book.worksheet(0)
+      sheet.insert_row(0,['A2', 'B2'])
+      sheet.row(0).insert 1, 'bilbo'
+      book.write tmpfile
+    end                 #close the spreadsheet
+
+    File.delete baselineFile                              #need to delete the original file before we can write to it again
+    FileUtils.move tmpfile, baselineFile, :force => true  #move the file
+
+  end
+
+  def rewriteBaseline(baselineFile,rowIndex)
+    #rowIndex is the row that you want to start writing the file to
+    tmpfile = "tmp_#{baselineFile}"
+    Spreadsheet.open baselineFile do |book|
+      sheet = book.worksheet(0)
+
+      sheet[rowIndex,0] = "Ross"
+      sheet[rowIndex,1] = "Schoessler"
+
+      book.write tmpfile
+    end                 #close the spreadsheet
+
+    File.delete baselineFile                              #need to delete the original file before we can write to it again
+    FileUtils.move tmpfile, baselineFile, :force => true  #move the file
+
+
+  end
+
+  def generateBaselineFile(baselineFile)
+
+    tmpfile = "new_#{baselineFile}"
+    Spreadsheet.open baselineFile do |book|
+      sheet = book.worksheet(0)
+        #first get the dimensions
+        #puts sheet.dimensions
+        numRows = sheet.dimensions[1]
+        numCols = sheet.dimensions[3]
+
+        puts "Number of rows:  #{numRows}"
+        puts "Number of columns:  #{numCols}"
+        rowIndex=0
+
+
+        #first go through one row
+        begin                           #rows
+          row = sheet.row(rowIndex)
+          colIndex=0                    #set this back to zero
+          begin                         #column
+            value = row[colIndex].to_s
+            puts value          #replace with code to replace via regex
+            newValue = value.gsub(/\./, '\.')
+            newValue = newValue.gsub(/\*/, '\*')
+            newValue = newValue.gsub(/\(/, '\(')
+            newValue = newValue.gsub(/\)/, '\)')
+            newValue = newValue.gsub(/(\d\d)-(\D\D\D)-(\d\d\d\d)/, '\1-\2-\3')
+            newValue = newValue.gsub(/(\d\d?)-(\d\d?)-(\d\d\d{2})/, '\2-\1-\3')
+            puts newValue
+            puts "Coordinates: #{rowIndex}, #{colIndex}"
+            puts "iterations = #{colIndex}"
+            if value != newValue
+              sheet[rowIndex,colIndex] = newValue
+              puts sheet[rowIndex,colIndex]
+            end
+            colIndex += 1
+          end until colIndex == numCols
+          rowIndex += 1
+        end until rowIndex == numRows
+
+      book.write tmpfile
+    end                 #close the spreadsheet
+
+    #File.delete baselineFile                              #need to delete the original file before we can write to it again
+    #FileUtils.move tmpfile, baselineFile, :force => true  #move the file
+
+  end
+
   def replacePeriods(baselineFile)
     tmpfile = "tmp_#{baselineFile}"
     Spreadsheet.open baselineFile do |book|
       sheet = book.worksheet "sheet1"
-      sheet[1,0] = "."
-      sheet[1,1] = "."
-
+      sheet[1,0] = "(300,000,000.00)"
+      sheet[1,1] = "253.45%"
       book.write tmpfile
     end                 #close the spreadsheet
 
