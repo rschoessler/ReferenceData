@@ -22,16 +22,13 @@ class Baseline
     #this will create the initial file
     #and takes a parameter of columns to create
     #it will then create a row with A B C etc.
-
     baselineFile = "#{fileNameRoot}.xls"
     puts baselineFile
     puts numColumns
-
     #create the file
     book = Spreadsheet::Workbook.new
     sheet = book.create_worksheet
     sheet.name = "sheet1"
-
     #create the header row
     letter = "a"
     i = 0
@@ -42,15 +39,11 @@ class Baseline
       puts letter.upcase
       puts i
     end until i == numColumns
-
     book.write baselineFile
-
     return baselineFile
-
   end
 
   def insertHeaderRow(numColumns,baselineFile)
-
     tmpfile = "tmp_#{baselineFile}"
     Spreadsheet.open baselineFile do |book|
       sheet = book.worksheet(0)
@@ -61,29 +54,9 @@ class Baseline
 
     File.delete baselineFile                              #need to delete the original file before we can write to it again
     FileUtils.move tmpfile, baselineFile, :force => true  #move the file
-
-  end
-
-  def rewriteBaseline(baselineFile,rowIndex)
-    #rowIndex is the row that you want to start writing the file to
-    tmpfile = "tmp_#{baselineFile}"
-    Spreadsheet.open baselineFile do |book|
-      sheet = book.worksheet(0)
-
-      sheet[rowIndex,0] = "Ross"
-      sheet[rowIndex,1] = "Schoessler"
-
-      book.write tmpfile
-    end                 #close the spreadsheet
-
-    File.delete baselineFile                              #need to delete the original file before we can write to it again
-    FileUtils.move tmpfile, baselineFile, :force => true  #move the file
-
-
   end
 
   def generateBaselineFile(baselineFile)
-
     tmpfile = "new_#{baselineFile}"
     Spreadsheet.open baselineFile do |book|
       sheet = book.worksheet(0)
@@ -95,7 +68,6 @@ class Baseline
         puts "Number of rows:  #{numRows}"
         puts "Number of columns:  #{numCols}"
         rowIndex=0
-
 
         #first go through one row
         begin                           #rows
@@ -109,7 +81,7 @@ class Baseline
             newValue = newValue.gsub(/\(/, '\(')
             newValue = newValue.gsub(/\)/, '\)')
             newValue = newValue.gsub(/(\d\d)-(\D\D\D)-(\d\d\d\d)/, '\1-\2-\3')
-            newValue = newValue.gsub(/(\d\d?)-(\d\d?)-(\d\d\d{2})/, '\2-\1-\3')
+            newValue = newValue.gsub(/(\d+)\/(\d+)\/(\d\d+)/, '\1/\2/\3')
             puts newValue
             puts "Coordinates: #{rowIndex}, #{colIndex}"
             puts "iterations = #{colIndex}"
@@ -121,7 +93,6 @@ class Baseline
           end until colIndex == numCols
           rowIndex += 1
         end until rowIndex == numRows
-
       book.write tmpfile
     end                 #close the spreadsheet
 
@@ -130,12 +101,16 @@ class Baseline
 
   end
 
-  def replacePeriods(baselineFile)
+  def createGenericTestFile(baselineFile)
     tmpfile = "tmp_#{baselineFile}"
     Spreadsheet.open baselineFile do |book|
       sheet = book.worksheet "sheet1"
       sheet[1,0] = "(300,000,000.00)"
       sheet[1,1] = "253.45%"
+      sheet[1,2] = "(300,000,000.00)"
+      sheet[1,3] = "*fix this asterisk"
+      sheet[2,1] = "01-Jan-2013"
+      sheet[2,2] = "12/1/2013"
       book.write tmpfile
     end                 #close the spreadsheet
 
