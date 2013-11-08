@@ -29,6 +29,7 @@ class Baseline
     book = Spreadsheet::Workbook.new
     sheet = book.create_worksheet
     sheet.name = "sheet1"
+
     #create the header row
     letter = "a"
     i = 0
@@ -43,30 +44,50 @@ class Baseline
     return baselineFile
   end
 
-  def insertHeaderRow(numColumns,baselineFile)
-    tmpfile = "tmp_#{baselineFile}"
-    Spreadsheet.open baselineFile do |book|
+  def insertHeaderRow(numColumns)
+    #tmpfile = "new_#{baselineFile}"
+    #Spreadsheet.open baselineFile do |book|
       sheet = book.worksheet(0)
-      sheet.insert_row(0,['A2', 'B2'])
-      sheet.row(0).insert 1, 'bilbo'
-      book.write tmpfile
-    end                 #close the spreadsheet
+      numColumns = sheet.dimensions[3]   #gets the number of columns
 
-    File.delete baselineFile                              #need to delete the original file before we can write to it again
-    FileUtils.move tmpfile, baselineFile, :force => true  #move the file
+      #create the header row
+      letter = "a"
+      i = 0
+      begin
+        sheet[0,i] = letter.upcase
+        i += 1
+        letter = letter.next
+        puts letter.upcase
+        puts i
+      end until i == numColumns
+      #book.write baselineFile
+      #return baselineFile
+    #end                 #close the spreadsheet
+
+    #File.delete baselineFile                              #need to delete the original file before we can write to it again
+    #FileUtils.move tmpfile, baselineFile, :force => true  #move the file
   end
 
-  def generateBaselineFile(baselineFile)
+  def generateBaselineFile(baselineFile,numCols,numRows)
+
     tmpfile = "new_#{baselineFile}"
     Spreadsheet.open baselineFile do |book|
       sheet = book.worksheet(0)
-        #first get the dimensions
-        #puts sheet.dimensions
-        numRows = sheet.dimensions[1]
-        numCols = sheet.dimensions[3]
 
         puts "Number of rows:  #{numRows}"
         puts "Number of columns:  #{numCols}"
+
+        ##create the header row
+        #letter = "a"
+        #i = 0
+        #begin
+        #  sheet[0,i] = letter.upcase
+        #  i += 1
+        #  letter = letter.next
+        #  puts letter.upcase
+        #  puts i
+        #end until i == numCols
+
         rowIndex=0
 
         #first go through one row
@@ -75,14 +96,18 @@ class Baseline
           colIndex=0                    #set this back to zero
           begin                         #column
             value = row[colIndex].to_s
-            puts value          #replace with code to replace via regex
-            newValue = value.gsub(/\./, '\.')
-            newValue = newValue.gsub(/\*/, '\*')
-            newValue = newValue.gsub(/\(/, '\(')
-            newValue = newValue.gsub(/\)/, '\)')
+            puts "Value:  #{value}"          #replace with code to replace via regex
+            format = row.format(colIndex).number_format
+            puts "Format:  |#{format}|"
+            value = row[colIndex].to_s
+            newValue = value.gsub(/\./, '\.')           #escape all '.'
+            newValue = newValue.gsub(/\*/, '\*')        #escape all '*'
+            newValue = newValue.gsub(/\(/, '\(')        #escape all '('
+            newValue = newValue.gsub(/\)/, '\)')        #escape all ')'
             newValue = newValue.gsub(/(\d\d)-(\D\D\D)-(\d\d\d\d)/, '\1-\2-\3')
-            newValue = newValue.gsub(/(\d+)\/(\d+)\/(\d\d+)/, '\1/\2/\3')
-            puts newValue
+            newValue = newValue.gsub(/(\d+)\/(\d+)\/(\d\d+)/, '="\1/\2/\3"')
+            newValue = newValue.gsub(/^(-?\d+)$/,'\1\.0') #get all values like -85000000 or 85000000 with no decimal
+            puts "New Value:  #{newValue}"
             puts "Coordinates: #{rowIndex}, #{colIndex}"
             puts "iterations = #{colIndex}"
             if value != newValue
@@ -98,6 +123,21 @@ class Baseline
 
     #File.delete baselineFile                              #need to delete the original file before we can write to it again
     #FileUtils.move tmpfile, baselineFile, :force => true  #move the file
+
+  end
+
+  def getColumnCount(baselineFile)
+    Spreadsheet.open baselineFile do |book|
+      sheet = book.worksheet(0)
+      #first get the dimensions
+      #puts sheet.dimensions
+      numRows = sheet.dimensions[1]
+      numCols = sheet.dimensions[3]
+
+      puts "Number of rows:  #{numRows}"
+      puts "Number of columns:  #{numCols}"
+      return numCols, numRows
+    end
 
   end
 

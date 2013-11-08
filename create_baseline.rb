@@ -1,21 +1,33 @@
 require 'spreadsheet'
 require_relative 'generate_baseline'
 Spreadsheet.client_encoding = 'UTF-8'
-#Spreadsheet.client_encoding = 'UTF-16LE'
 
 mybaseline = Baseline.new
 
 numcols = 4 #abcdefgh etc
 filenameroot = "baseline_test"
-baselineFile = "baseline_test.xls"
+#baselineFile = "baseline_test.xls"
+#baselineFile = "example.xls"
+baselineFile = "Valuation_Functions.xls"
 
-#baselineFile = mybaseline.initBaselineFile(numcols, filenameroot) #remove this later after testing
 
-mybaseline.createGenericTestFile (baselineFile)
+#open the baselineFile and count the columns
+arrColRow = mybaseline.getColumnCount(baselineFile)
+#puts arrColRow
+numCols = arrColRow[0]
+numRows = arrColRow[1]
+puts numCols
+puts numRows
 
-puts baselineFile
+#create a file with the header row
+#we'll open this up and write the data to it later
+#initBaselineFile = mybaseline.initBaselineFile(numcols, filenameroot) #remove this later after testing
 
-mybaseline.generateBaselineFile(baselineFile)
+#mybaseline.createGenericTestFile (baselineFile)
 
-#mybaseline.insertHeaderRow(numcols, baselineFile)
+#puts initBaselineFile
+
+mybaseline.generateBaselineFile(baselineFile,numCols,numRows)
+
+#mybaseline.insertHeaderRow(numCols, baselineFile)
 
